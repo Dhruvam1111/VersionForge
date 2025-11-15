@@ -79,10 +79,11 @@ int write_tree_recursive(const char *path, char *out_sha1_hex, unsigned char *ou
     struct tree_entry_list list = { .entries = NULL, .count = 0, .capacity = 0 };
 
     while ((entry = readdir(d)) != NULL) {
-        // Ignore ., .., and .minivcs
+        // Ignore ., .., .minivcs, and our own executable
         if (strcmp(entry->d_name, ".") == 0 || 
             strcmp(entry->d_name, "..") == 0 ||
-            strcmp(entry->d_name, ".minivcs") == 0) {
+            strcmp(entry->d_name, ".minivcs") == 0 ||
+            strcmp(entry->d_name, "version_forge") == 0) {
             continue;
         }
 

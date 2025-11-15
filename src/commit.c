@@ -13,12 +13,11 @@ int do_commit(const char *message) {
     unsigned char root_tree_bin[SHA_DIGEST_LENGTH];
 
     // 1. Write the tree for the current directory
-    printf("Building tree...\n");
+    // We pass root_tree_bin so it gets populated
     if (write_tree_recursive(".", root_tree_hex, root_tree_bin) != 0) {
         fprintf(stderr, "Error building tree.\n");
         return -1;
     }
-    printf("Root tree: %s\n", root_tree_hex);
 
     // 2. Get the current ref path (e.g., "refs/heads/main")
     char current_ref_path[256];
@@ -32,37 +31,27 @@ int do_commit(const char *message) {
     int has_parent = 0;
     if (read_ref(current_ref_path, parent_sha) == 0) {
         has_parent = 1;
-        printf("Parent: %s\n", parent_sha);
-    } else {
-        printf("No parent commit. Creating root commit.\n");
     }
 
     // 4. Format the commit object content
-    // We'll hardcode the author for now
     char *author = "Dhruvam Panchal <dhruvam@example.com>";
     long timestamp = time(NULL);
-    // TODO: Get timezone offset
     char *timezone = "+0530"; 
 
-    // Use a dynamic buffer (string builder)
     size_t capacity = 1024;
     char *commit_content = malloc(capacity);
     int content_len = 0;
     
-    // Add tree
     content_len += snprintf(commit_content + content_len, capacity - content_len,
                             "tree %s\n", root_tree_hex);
-    // Add parent
     if (has_parent) {
         content_len += snprintf(commit_content + content_len, capacity - content_len,
                                 "parent %s\n", parent_sha);
     }
-    // Add author/committer
     content_len += snprintf(commit_content + content_len, capacity - content_len,
                             "author %s %ld %s\n", author, timestamp, timezone);
     content_len += snprintf(commit_content + content_len, capacity - content_len,
                             "committer %s %ld %s\n", author, timestamp, timezone);
-    // Add message
     content_len += snprintf(commit_content + content_len, capacity - content_len,
                             "\n%s\n", message);
 
@@ -81,6 +70,15 @@ int do_commit(const char *message) {
         return -1;
     }
 
-    printf("Committed to %s: %s\n", current_ref_path, new_commit_hex);
+    // *** PRINT STATEMENTS MOVED HERE ***
+    printf("Committed to %s\n", current_ref_path);
+    printf("Root tree: %s\n", root_tree_hex);
+    if (has_parent) {
+        printf("Parent: %s\n", parent_sha);
+    } else {
+        printf("No parent commit. Created root commit.\n");
+    }
+    printf("Commit: %s\n", new_commit_hex);
+    
     return 0;
 }

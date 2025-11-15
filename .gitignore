@@ -3,7 +3,7 @@
 *.o
 src/*.o
 
-# Ignore all text files
+#Ignore all text files
 *.txt
 
 # Ignore the final compiled program
