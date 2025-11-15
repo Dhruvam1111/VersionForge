@@ -1,0 +1,16 @@
+# Ignore all build artifacts (object files)
+# These are re-created by the Makefile
+*.o
+src/*.o
+
+# Ignore all text files
+*.txt
+
+# Ignore the final compiled program
+# This is also re-created by the Makefile
+version_forge
+
+# --- VERY IMPORTANT ---
+# Ignore the repository data created by YOUR program
+# You don't want Git tracking the test repo your VCS creates
+.minivcs/
