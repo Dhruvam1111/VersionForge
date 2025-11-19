@@ -34,7 +34,7 @@ VersionForge is a compact, educational distributed version-control system writte
 <a id="overview"></a>
 ## Overview 📖
 
-VersionForge demonstrates how a distributed version-control system can be implemented in a small, self-contained project. The client CLI (`version_forge`) exposes repository commands and the server (`[...]
+VersionForge is an instructional, compact distributed version-control system that demonstrates the fundamental building blocks of modern VCS tools. The project models object storage and hashing, commit graphs, branch management, checkouts, merges, and rebases in a readable C codebase. It provides a command-line client (`version_forge`) for local repository operations and a minimal TCP server (`vf_server`) to demonstrate remote synchronization via `push`/`pull`/`fork`. VersionForge is designed for learning, experimentation, and extending VCS concepts.
 
 <a id="features"></a>
 ## Features ⚙️
