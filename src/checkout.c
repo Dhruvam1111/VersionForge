@@ -98,16 +98,33 @@ static int restore_tree(const char *tree_hash, const char *path) {
 int do_checkout(const char *target) {
     char commit_hash[41];
     char tree_hash[41];
+    int is_branch = 0;
+    char branch_ref_path[256];
 
-    // For now, we only support checking out a specific commit hash
-    // A full implementation would check for branch names
-    if (strlen(target) != 40) {
-        fprintf(stderr, "Error: Must provide a 40-char commit hash.\n");
-        return 1;
+    // 1. Check if 'target' is a branch name
+    snprintf(branch_ref_path, sizeof(branch_ref_path), "refs/heads/%s", target);
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), ".minivcs/%s", branch_ref_path);
+
+    if (access(full_path, F_OK) == 0) {
+        // It IS a branch!
+        is_branch = 1;
+        if (read_ref(branch_ref_path, commit_hash) != 0) {
+            fprintf(stderr, "Error: Could not read branch ref %s\n", target);
+            return 1;
+        }
+        printf("Switched to branch '%s'\n", target);
+    } else {
+        // Assume it is a commit hash
+        if (strlen(target) != 40) {
+            fprintf(stderr, "Error: Target '%s' is not a valid branch or commit hash.\n", target);
+            return 1;
+        }
+        strcpy(commit_hash, target);
+        printf("Note: checking out '%s'.\nYou are in 'detached HEAD' state.\n", target);
     }
-    strcpy(commit_hash, target);
 
-    // 1. Get tree from commit
+    // 2. Get tree from commit
     char *type = NULL;
     char *data = NULL;
     size_t size = 0;
@@ -131,23 +148,27 @@ int do_checkout(const char *target) {
     free(type);
     free(data);
 
-    // 2. Clean working directory
-    printf("Cleaning working directory...\n");
+    // 3. Clean working directory
     clean_directory(".");
 
-    // 3. Restore tree
-    printf("Restoring commit %s...\n", commit_hash);
+    // 4. Restore tree
     if (restore_tree(tree_hash, ".") != 0) {
         fprintf(stderr, "Error restoring tree.\n");
         return 1;
     }
 
-    // 4. Update HEAD to point to this commit (DETACHED HEAD)
+    // 5. Update HEAD
     FILE *head = fopen(".minivcs/HEAD", "w");
     if (head) {
-        fprintf(head, "%s\n", commit_hash);
+        if (is_branch) {
+            // Point to the branch ref (e.g., ref: refs/heads/main)
+            fprintf(head, "ref: %s\n", branch_ref_path);
+        } else {
+            // Point to the hash directly (detached HEAD)
+            fprintf(head, "%s\n", commit_hash);
+        }
         fclose(head);
     }
-    printf("HEAD is now at %s\n", commit_hash);
+
     return 0;
 }

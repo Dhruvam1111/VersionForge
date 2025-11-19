@@ -1,39 +1,30 @@
-# Compiler
 CC = gcc
-
-# Compiler flags
-# -g: Adds debugging information
-# -Wall: Enables all warnings
-# -Iinclude: Tells gcc to look for header files in the 'include' directory
 CFLAGS = -g -Wall -Iinclude
+LDFLAGS = -lz -lcrypto -lpthread
 
-# Linker flags
-# -lz: Links the zlib library (for compression)
-# -lcrypto: Links the OpenSSL crypto library (for SHA-1)
-LDFLAGS = -lz -lcrypto
-
-# Find all .c files in the src directory
+# All sources
 SRCS = $(wildcard src/*.c)
+ALL_OBJS = $(SRCS:.c=.o)
 
-# Replace .c extensions with .o (object files)
-OBJS = $(SRCS:.c=.o)
+# CLIENT objects: Everything EXCEPT server.c
+CLIENT_OBJS = $(filter-out src/server.o, $(ALL_OBJS))
 
-# The final executable name
-TARGET = version_forge
+# SERVER objects: Everything EXCEPT main.c AND network_client.c
+# The server needs network_utils.o, but not the client command logic.
+SERVER_OBJS = $(filter-out src/main.o src/network_client.o, $(ALL_OBJS))
 
-# Default target: build the 'version_forge' executable
-all: $(TARGET)
+all: version_forge vf_server
 
-# Rule to link the final executable
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LDFLAGS)
+version_forge: $(CLIENT_OBJS)
+	$(CC) $(CFLAGS) -o version_forge $(CLIENT_OBJS) $(LDFLAGS)
 
-# Rule to compile .c source files into .o object files
+vf_server: $(SERVER_OBJS)
+	$(CC) $(CFLAGS) -o vf_server $(SERVER_OBJS) $(LDFLAGS)
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean up build files
 clean:
-	rm -f src/*.o $(TARGET)
+	rm -f src/*.o version_forge vf_server
 
 .PHONY: all clean
