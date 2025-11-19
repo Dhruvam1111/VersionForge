@@ -1,6 +1,6 @@
 # VersionForge
 
-VersionForge is a lightweight, educational version-control system implemented in C. It implements core VCS concepts — repository initialization, commits, branching, checkouts, merging, rebasing, and[...]
+VersionForge is a compact, educational distributed version-control system written in C. It implements core VCS building blocks — repository initialization, object storage and hashing, commits, branching, checkouts, merging, and rebasing — plus a simple client/server push/pull protocol for sharing objects. The codebase is intentionally small and readable, making VersionForge well suited for learning, experimenting, and prototyping version-control ideas.
 
 ## Authors ✨
 - Dhruvam Panchal (202401415)
